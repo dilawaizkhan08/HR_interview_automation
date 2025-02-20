@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Interview System</title>
+</head>
+<body>
+    <h1>{{ message }}</h1>
+
+    <!-- Button to trigger question generation -->
+    <button id="start-question-generation">Start Question Generation</button>
+
+    <div id="questions-container"></div>
+
+    <script>
+        document.getElementById('start-question-generation').onclick = async function() {
+            try {
+                // Send a POST request to the FastAPI backend to generate questions
+                const response = await fetch('/generate-questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Clear previous questions and display the new ones
+                    const questionsContainer = document.getElementById('questions-container');
+                    questionsContainer.innerHTML = '';
+
+                    // Loop through each record and display questions
+                    data.data.forEach(item => {
+                        const section = document.createElement('section');
+                        section.innerHTML = `
+                            <h3>${item.name} (${item.phone})</h3>
+                            <ul>
+                                ${item.questions.map(question => `<li>${question}</li>`).join('')}
+                            </ul>
+                        `;
+                        questionsContainer.appendChild(section);
+                    });
+                } else {
+                    alert('Failed to generate questions');
+                }
+            } catch (error) {
+                console.error('Error generating questions:', error);
+                alert('Error generating questions');
+            }
+        }
+    </script>
+</body>
+</html>
